@@ -117,7 +117,7 @@ def quiz(request):
 #     words = Word.objects.all()
 #     question_word = random.sample([word for word in words],4)
 
-#     openai.api_key = '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'
+#     openai.api_key = ''
 
 #     completion = openai.ChatCompletion.create(
 #     model="gpt-3.5-turbo",
