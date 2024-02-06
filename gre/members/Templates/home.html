@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+<link rel="stylesheet" href="{% static 'home.css' %}">
+<body>
+
+<h1>這是一個英文學習網站</h1>
+<p>目前有以下功能:</p>
+<a href="{% url 'register' %}">register:註冊會員</a><br><br>
+
+<a href="{% url 'login' %}">login:會員登入</a><br><br>
+
+<a href="{% url 'quiz' %}">quiz:單字考試</a><br><br>
+
+<a href="{% url 'upload' %}">upload:上傳單字表</a><br><br>
+
+<a>/1/word:單字表</a><br><br>
+
+
+
+
+</body>
+</html>

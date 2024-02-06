@@ -1,0 +1,19 @@
+{% block content %}
+
+<h1>登入</h1>
+
+
+<form action="" method="POST">
+    {% csrf_token %}
+    {{ form.username.label_tag }}<br />
+    {{ form.username }}<br />
+    {{ form.password.label_tag }}<br />
+    {{ form.password }}<br />
+  
+  
+
+    <input class="btn btn-primary" type="submit" value="確認" />
+    <p>還沒有帳號嗎? <a href="{% url 'register' %}">註冊</a></p>
+</form>
+
+{% endblock  %}

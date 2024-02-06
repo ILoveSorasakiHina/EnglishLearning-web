@@ -1,0 +1,23 @@
+{% block content %}
+
+<h1>註冊</h1>
+
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.username.label_tag }}<br />
+  {{ form.username }}<br />
+  {{ form.password1.label_tag }}<br />
+  {{ form.password1 }}<br />
+  {{ form.password2.label_tag }}<br />
+  {{ form.password2 }}<br />
+  <p>Your password can’t be too similar to your other personal information.<p></p>
+  <p>Your password must contain at least 8 characters.<p></p>
+  <p>Your password can’t be a commonly used password.<p></p>
+  <p>Your password can’t be entirely numeric.<p></p>
+
+
+    <input class="btn btn-success" type="submit" value="確認" />
+</form>
+
+{% endblock  %}

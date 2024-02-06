@@ -1,0 +1,9 @@
+<form method="post" action="{% url 'submit_answer' %}">
+    {% csrf_token %}
+    <p>{{ question }}</p>
+    {% for choice, is_correct in choices %}
+        <input type="radio" name="answer" value="{{ choice }}">
+        <label>{{ choice }}</label><br>
+    {% endfor %}
+    <input type="submit" value="提交">
+</form>

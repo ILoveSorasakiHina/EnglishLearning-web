@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Result</title>
+</head>
+<body>
+    <h1>Quiz Result</h1>
+    {% if is_correct %}
+        <p>Your answer is correct!</p>
+    {% else %}
+        <p>Sorry, your answer is incorrect.</p>
+    {% endif %}
+    <a href="{% url 'quiz' %}">Back to Quiz</a>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{% block content %}
+  <h2>難度{{ key }}的詞語</h2>
+  <ul>
+  {% for word in words %}
+    <li>{{ word }}</li>
+  {% empty %}
+    <li>沒有詞語。</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
