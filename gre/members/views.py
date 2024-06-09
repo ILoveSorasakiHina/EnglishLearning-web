@@ -117,7 +117,7 @@ def quiz(request):
     })
 
 
-openai.api_key = 'sk-proj-1pThdNT6tqrLyiGiPC2vT3BlbkFJVD25OSQQGA0pILfKr4Va'
+openai.api_key = ''
 
 def quiz2(request):
     question_words = Word.objects.all()
