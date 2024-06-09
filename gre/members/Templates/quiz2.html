@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+</head>
+<body>
+    <h1>English Word Quiz</h1>
+    <form method="post" action="{% url 'submit_answer' %}">
+        {% csrf_token %}
+        <p>{{ question }}</p>
+        <ul>
+            {% for key, value in options.items %}
+                <li>
+                    <input type="radio" id="option{{ key }}" name="answer" value="{{ key }}">
+                    <label for="option{{ key }}">{{ key }}. {{ value }}</label>
+                </li>
+            {% endfor %}
+        </ul>
+        <button type="submit">Submit Answer</button>
+    </form>
+</body>
+</html>

@@ -11,8 +11,9 @@ class Word(models.Model):
     def __str__(self):
         return f"{self.word}  ({self.part_of_speech})  : {self.meaning}"
 
-class user(User):
+class User(User):
     word = models.CharField(max_length=255)
+    openai_key = models.CharField(max_length=255,null=True)
 
     def __str__(self):
         return self.word

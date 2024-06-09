@@ -3,8 +3,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.template import loader
-from .models import Word,user
+from .models import Word,User
 from .forms import LoginForm,RegisterForm,WordFrom
 
 
@@ -15,13 +16,13 @@ def sign_up(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('/login')  #重新導向到登入畫面
+            return redirect('/login')  #重新導向登入畫面
     context = {
         'form': form
     }
     return render(request, 'register.html', context)
 
-
+#登入
 def sign_in(request):
     form = LoginForm()
     if request.method == "POST":
@@ -30,11 +31,16 @@ def sign_in(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('/')  #重新導向到首頁
+            return redirect('/profile/')  #重新導向會員專屬頁面
     context = {
         'form': form
     }
     return render(request, 'login.html', context)
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html', {'user': request.user})
+
 
 # def remember_word(request):
 #     form = WordFrom
@@ -72,9 +78,6 @@ def upload_csv(request):
     else:
         return render(request,"upload_csv.html")
     
-# def delete_same_word(self):
-
-
 
 def delete_all_word():
     #刪庫走人
@@ -113,20 +116,50 @@ def quiz(request):
         'choices': [(word.word, word == question_word) for word in all_words]
     })
 
-# def quiz2(request):
-#     words = Word.objects.all()
-#     question_word = random.sample([word for word in words],4)
 
-#     openai.api_key = ''
+openai.api_key = 'sk-proj-1pThdNT6tqrLyiGiPC2vT3BlbkFJVD25OSQQGA0pILfKr4Va'
 
-#     completion = openai.ChatCompletion.create(
-#     model="gpt-3.5-turbo",
-#     messages=[
-#         {"role": "teacher", "content": f"{question_word} 請就這四個單字出一個克漏字選擇題"}
-#     ]
-# )
-    
+def quiz2(request):
+    question_words = Word.objects.all()
+    options = random.sample(list(question_words), 4)
 
+    prompt = f"請回傳給我一題英文單字選擇題，格式如下：\n" \
+             f"英文題目\n" \
+             f"A. {options[0].word}\n" \
+             f"B. {options[1].word}\n" \
+             f"C. {options[2].word}\n" \
+             f"D. {options[3].word}\n" \
+             f"正確單字的選項（例如：'A'）\n" \
+             f"範例如下:\n" \
+             f"What is the synonym of commendation?\nA. praise\nB. criterion\nC. cassette\nD. temptation\n'answer:A. praise'"
+
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": prompt}
+            ]
+        )
+        response_message = completion.choices[0].message['content'].split("\n")
+        
+        question = response_message[0]
+        options_text = response_message[1:5]
+        correct_answer = response_message[5].split(":")[1].strip().rstrip("'")
+
+
+        # 將選項處理為字典
+        options_dict = {opt.split(". ")[0]: opt.split(". ")[1] for opt in options_text}
+
+        # 將正確答案存儲到session中
+        request.session['correct_answer'] = correct_answer
+
+        return render(request, 'quiz2.html', {
+            'question': question,
+            'options': options_dict  
+        })
+
+    except Exception as e:
+        return HttpResponse(str(e))
 
 def submit_answer(request):
     if request.method == 'POST':
