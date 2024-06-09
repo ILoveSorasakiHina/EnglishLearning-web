@@ -31,3 +31,9 @@ class LoginForm(forms.Form):
 
 class WordFrom(forms.Form):
     word = forms.CharField()
+
+
+class UserProfileForm(forms.Form):
+    openai_key = forms.CharField(max_length=255, required=False)
+    word = forms.CharField(max_length=255)
+
