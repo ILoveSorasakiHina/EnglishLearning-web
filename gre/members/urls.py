@@ -1,5 +1,5 @@
 from django.urls import path,re_path
-from .views import sign_up,sign_in,home,upload_csv,quiz,submit_answer,result,get_all_word,delete_all_word,quiz2,profile
+from .views import sign_up,sign_in,home,upload_csv,quiz,submit_answer,result,get_all_word,delete_all_word,quiz2,profile,update
 urlpatterns = [
     path('', home, name='home'),
     path('register/', sign_up, name='register'),
@@ -11,7 +11,8 @@ urlpatterns = [
     re_path(r'^(?P<key>\d+)/word/$',get_all_word , name='get_all_word'),
     path('delete_all_word',delete_all_word,name='delete_all_word'),
     path('quiz2/',quiz2,name = 'quiz2'),
-    path("profile/",profile,name="profile")
+    path("profile/",profile,name="profile"),
+    path("update/",update,name="update")
 ]
 
 

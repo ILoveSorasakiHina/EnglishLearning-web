@@ -1,12 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-
-
-
+from .models import CustomUser  
 
 class RegisterForm(UserCreationForm):
-        
     username = forms.CharField(
         label="帳號",
         widget=forms.TextInput(attrs={'class': 'form-control'})
@@ -21,9 +17,8 @@ class RegisterForm(UserCreationForm):
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'password1', 'password2')
-
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -32,8 +27,7 @@ class LoginForm(forms.Form):
 class WordFrom(forms.Form):
     word = forms.CharField()
 
-
-class UserProfileForm(forms.Form):
-    openai_key = forms.CharField(max_length=255, required=False)
-    word = forms.CharField(max_length=255)
-
+class UpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['word', 'openai_key']

@@ -5,8 +5,8 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template import loader
-from .models import Word,User
-from .forms import LoginForm,RegisterForm,WordFrom
+from .models import Word
+from .forms import LoginForm,RegisterForm,WordFrom,UpdateForm
 
 
 # 註冊
@@ -40,6 +40,24 @@ def sign_in(request):
 @login_required
 def profile(request):
     return render(request, 'profile.html', {'user': request.user})
+
+
+@login_required
+def update(request):
+    if request.method == 'POST':
+        form = UpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            request.user.refresh_from_db()
+            print(request.user.word)
+            print(request.user.openai_key)
+            return redirect('profile')
+        else:
+            print(form.errors)
+    else:
+        form = UpdateForm(instance=request.user)
+    return render(request, 'update.html', {'form': form})
+
 
 
 # def remember_word(request):

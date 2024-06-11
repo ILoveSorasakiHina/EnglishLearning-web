@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 
 class Word(models.Model):
     word = models.CharField(max_length=255)
@@ -11,12 +11,10 @@ class Word(models.Model):
     def __str__(self):
         return f"{self.word}  ({self.part_of_speech})  : {self.meaning}"
 
-class user(User):
-    word = models.CharField(max_length=255,null=True)
-    openai_key = models.CharField(max_length=255,null=True)
 
-    def __str__(self):
-        return self.word
+class CustomUser(AbstractUser):
+    word = models.CharField(max_length=255, null=True)
+    openai_key = models.CharField(max_length=255, null=True)
 
 
 
