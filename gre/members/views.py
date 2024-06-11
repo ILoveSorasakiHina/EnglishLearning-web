@@ -90,7 +90,7 @@ def upload_csv(request):
                 part_of_speech=column[1],
                 meaning=column[2],
                 #依難度調整level的數字
-                level = 6
+                level = 2
             )
         return HttpResponse("CSV文件已成功上傳並保存到資料庫中！")
     else:
