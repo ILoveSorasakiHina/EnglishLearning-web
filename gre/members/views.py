@@ -17,6 +17,8 @@ def sign_up(request):
         if form.is_valid():
             form.save()
             return redirect('/login')  #重新導向登入畫面
+        else:
+            print(form.errors)  # 顯示表單錯誤以便調試
     context = {
         'form': form
     }
@@ -90,14 +92,14 @@ def upload_csv(request):
                 part_of_speech=column[1],
                 meaning=column[2],
                 #依難度調整level的數字
-                level = 2
+                level = 6
             )
         return HttpResponse("CSV文件已成功上傳並保存到資料庫中！")
     else:
         return render(request,"upload_csv.html")
     
 
-def delete_all_word():
+def delete_all_word(request):
     #刪庫走人
     words=Word.objects.all()
     words.delete()
@@ -135,9 +137,10 @@ def quiz(request):
     })
 
 
-openai.api_key = ''
-
+@login_required
 def quiz2(request):
+    openai.api_key = request.user.openai_key
+
     question_words = Word.objects.all()
     options = random.sample(list(question_words), 4)
 
