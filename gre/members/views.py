@@ -24,7 +24,7 @@ def sign_up(request):
     }
     return render(request, 'register.html', context)
 
-#登入
+# 登入
 def sign_in(request):
     form = LoginForm()
     if request.method == "POST":
@@ -33,7 +33,7 @@ def sign_in(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('/profile/')  #重新導向會員專屬頁面
+            return redirect('/profile/')  # 重新導向會員專屬頁面
     context = {
         'form': form
     }
@@ -71,21 +71,21 @@ def update(request):
 #     return render(request,'')
         
 
-#讀入html並輸出
+# 讀入html並輸出
 def home(request):
     template = loader.get_template('home.html')
     return HttpResponse(template.render())
 
-#禁用csrf保護，不然無法完成功能
+# 禁用csrf保護，不然無法完成功能
 @csrf_exempt
 def upload_csv(request):
-    #以UTF-8編碼讀取文件，並跳過第一行
+    # 以UTF-8編碼讀取文件，並跳過第一行
     if request.method == 'POST':
         csv_file = request.FILES['file']
         data_set = csv_file.read().decode('UTF-8')
         io_string = io.StringIO(data_set)
         next(io_string)
-        #分割元素並寫入資料庫，有相同word則更新，無則創建新資料
+        # 分割元素並寫入資料庫，有相同word則更新，無則創建新資料
         for column in csv.reader(io_string, delimiter=',', quotechar="|"):
             created =  Word.objects.update_or_create(
                 word=column[0],
@@ -100,13 +100,13 @@ def upload_csv(request):
     
 
 def delete_all_word(request):
-    #刪庫走人
+    # 刪庫走人
     words=Word.objects.all()
     words.delete()
     return HttpResponse("刪除成功!")
     
 def get_all_word(request,key):
-    #讀取單字
+    # 讀取單字
     try:
         words = Word.objects.filter(level=key)
         return render(request,"words.html",{"words" : words,"key":key})
@@ -115,19 +115,14 @@ def get_all_word(request,key):
         
 
 def quiz(request):
-    # 從資料庫中獲取所有單詞
     words = Word.objects.all()
-
     # 隨機選擇一個單詞作為問題
     question_word = random.choice(words)
-
     # 隨機選擇三個單詞作為錯誤答案
     wrong_words = random.sample([word for word in words if word != question_word], 3)
-
     # 將所有答案混合並隨機排序
     all_words = [question_word] + wrong_words
     random.shuffle(all_words)
-
     # 將正確答案儲存到 session 中
     request.session['correct_answer'] = question_word.word
 
@@ -139,11 +134,11 @@ def quiz(request):
 
 @login_required
 def quiz2(request):
+    # 接chatgpt api
     openai.api_key = request.user.openai_key
-
+    # 取得問題的單字
     question_words = Word.objects.all()
     options = random.sample(list(question_words), 4)
-
     prompt = f"請回傳給我一題英文單字選擇題，格式如下：\n" \
              f"英文題目\n" \
              f"A. {options[0].word}\n" \
@@ -168,9 +163,8 @@ def quiz2(request):
         correct_answer = response_message[5].split(":")[1].strip().rstrip("'")
 
 
-        # 將選項處理為字典
+        # 因為前端因素，將選項處理為字典
         options_dict = {opt.split(". ")[0]: opt.split(". ")[1] for opt in options_text}
-
         # 將正確答案存儲到session中
         request.session['correct_answer'] = correct_answer
 
@@ -184,29 +178,22 @@ def quiz2(request):
 
 def submit_answer(request):
     if request.method == 'POST':
-        # 從 POST 請求中獲取答案
+        # 從POST請求中獲取答案
         answer = request.POST.get('answer')
-
-        # 從 session 中獲取正確答案
+        # 從session中獲取正確答案
         correct_answer = request.session.get('correct_answer')
-
         # 檢查答案是否正確
         is_correct = (answer == correct_answer)
-
         # 將結果儲存到 session 中
         request.session['is_correct'] = is_correct
-
         # 重定向到結果頁面
         return redirect('result')
-
     # 如果不是 POST 請求，則重定向到測驗頁面
     return redirect('quiz')
 
 def result(request):
     # 從 session 中獲取答案
     is_correct = request.session.get('is_correct')
-
-    # 渲染結果頁面
     return render(request, 'result.html', {
         'is_correct': is_correct,
     })
