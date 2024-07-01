@@ -51,8 +51,6 @@ def update(request):
         if form.is_valid():
             form.save()
             request.user.refresh_from_db()
-            print(request.user.word)
-            print(request.user.openai_key)
             return redirect('profile')
         else:
             print(form.errors)
