@@ -23,10 +23,12 @@ jobs:
         working-directory: ./gre
       
       - name: Run tests
+      #同層級順序不影響運行
         working-directory: ./gre
         run: |
           venv\Scripts\activate
           python manage.py test
+    
 
 
   
