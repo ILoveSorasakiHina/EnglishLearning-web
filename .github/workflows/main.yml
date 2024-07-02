@@ -22,7 +22,7 @@ jobs:
           pip install -r gre/requirements.txt
       - name: Run tests
         run: |
-          python manage.py test
+          python gre/manage.py test
 
 
 
