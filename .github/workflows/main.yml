@@ -28,6 +28,7 @@ jobs:
         run: |
           venv\Scripts\activate
           python manage.py test
+          coverage report
     
 
 
