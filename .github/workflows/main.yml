@@ -21,7 +21,7 @@ jobs:
           source venv/bin/activate
           pip install -r gre/requirements.txt
       - name: Run tests
-        working-directory: ./myapp
+        working-directory: ./gre
         run: |
           python manage.py test
 
