@@ -46,3 +46,10 @@ chatgpt問題無法識別正確答案
 
 下個目標:
 用bootstrap重構前端
+
+7/2
+1.測試檔完工
+2.ci完工
+
+下個目標:
+bootstrap
