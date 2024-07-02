@@ -20,22 +20,13 @@ jobs:
           python -m venv venv
           venv\Scripts\activate
           pip install -r requirements.txt
+          pip install coverage
         working-directory: ./gre
       
-      - name: Run tests
+      - name: Run tests with coverage
       #同層級順序不影響運行
         working-directory: ./gre
         run: |
           venv\Scripts\activate
-          python manage.py test
+          coverage run manage.py test
           coverage report
-    
-
-
-  
-
-
-
-      
-      
-
