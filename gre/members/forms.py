@@ -24,10 +24,11 @@ class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
 
-class WordFrom(forms.Form):
-    word = forms.CharField()
-
+class WordForm(forms.Form):
+    word = forms.CharField(label='Enter a word', max_length=100)
+    
 class UpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['word', 'openai_key']
+

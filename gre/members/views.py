@@ -1,12 +1,15 @@
-import csv, io, random,openai
+import csv, io, random, openai, json, pickle,os,base64
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.template import loader
+from google.oauth2 import credentials
+from googleapiclient.discovery import build
+from requests_oauthlib import OAuth2Session
 from .models import Word
-from .forms import LoginForm,RegisterForm,WordFrom,UpdateForm
+from .forms import LoginForm,RegisterForm,WordForm,UpdateForm
 
 
 # 註冊
@@ -190,14 +193,129 @@ def submit_answer(request):
     return redirect('quiz')
 
 def result(request):
+    
     # 從 session 中獲取答案
     is_correct = request.session.get('is_correct')
     return render(request, 'result.html', {
         'is_correct': is_correct,
     })
 
+def authorize(request):
 
+    # 載入憑證
+    with open('client_secret_72064818004-snam4j27oel7vh7avgbs733bo5ipv4se.apps.googleusercontent.com.json', 'r') as read_file:
+        credential = json.load(read_file)
+        
+    client_id = credential['web']['client_id']
+    client_secret = credential['web']['client_secret']
+    authorization_base_url = credential['web']['auth_uri']
+    token_url = credential['web']['token_uri']
+    redirect_uri = 'http://localhost:8080/oauth2/callback/'
+    scope = ['https://www.googleapis.com/auth/cloud-platform']
+
+    # 登入驗證
+    google = OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri)
+    authorization_url, state = google.authorization_url(authorization_base_url,access_type="offline", prompt="select_account")
+    
+    # 儲存以作驗證
+    request.session['oauth_state'] = state
+    print(f"Generated state: {state}")
+    print(f"Stored state in session: {request.session.get('oauth_state')}")
+
+    # 導向授權URL
+    return redirect(authorization_url)
+
+def callback(request):
+
+    state = request.session.get('oauth_state')
+
+    # 檢查是否存在錯誤參數
+    error = request.GET.get('error')
+    if error:
+        return JsonResponse({'error': error, 'description': request.GET.get('error_description', '')}, status=403)
+
+    # 讀取登入憑證
+    with open('client_secret_72064818004-snam4j27oel7vh7avgbs733bo5ipv4se.apps.googleusercontent.com.json', 'r') as read_file:
+        credential = json.load(read_file)
+
+    client_id = credential['web']['client_id']
+    client_secret = credential['web']['client_secret']
+    token_url = credential['web']['token_uri']
+    redirect_uri = 'http://localhost:8080/oauth2/callback/'
+
+    # 讀取session中的state
+    state = request.session.get('oauth_state')
 
     
+    google = OAuth2Session(client_id, redirect_uri=redirect_uri, state=state)
+
+    # 獲取回傳的授權碼與state
+    code = request.GET.get('code')
+    returned_state = request.GET.get('state')
+
+    # # 驗證state是否匹配
+    # if state != returned_state:
+    #     return JsonResponse({'error': 'Invalid state parameter'}, status=400)
+
+    try:
+        # 使用授權碼獲得token
+        creds_info = google.fetch_token(token_url, client_secret=client_secret, code=code)
+        creds = credentials.Credentials(creds_info['access_token'])
+
+        request.session['access_token'] = creds_info['access_token']
+
+        return redirect('input_word')
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
+def convert_text_to_speech(request, word):
+    access_token = request.session.get('access_token')
+    
+    # 使用token建立服務請求
+    creds = credentials.Credentials(token=access_token)
+    service = build('texttospeech', 'v1', credentials=creds)
+
+    # 建立請求
+    synthesis_input = {'text': word}
+    voice = {'languageCode': 'en-US', 'name': 'en-US-Wavenet-D'}
+    audio_config = {'audioEncoding': 'MP3'}
+
+    # 發送請求並取得回應
+    response = service.text().synthesize(
+        body={
+            'input': synthesis_input,
+            'voice': voice,
+            'audioConfig': audio_config
+        }
+    ).execute()
+
+    #base64轉二進位
+    audio_content = base64.b64decode(response['audioContent'])
+    audio_dir = 'static/audio/'
+    audio_path = os.path.join(audio_dir, f'{word}.mp3')
+    
+    # 確認文件夾
+    os.makedirs(audio_dir, exist_ok=True)
+    
+    with open(audio_path, 'wb') as out:
+        out.write(audio_content)
+    
+    return True
+
+def input_word(request):
+    form = WordForm()
+    audio_path = None
+
+    if request.method == 'POST':
+        word = request.POST.get('word')
+        if convert_text_to_speech(request, word):
+            audio_path = f'/static/audio/{word}.mp3'
+        
+    context = {
+        'form': form,
+        'audio_path': audio_path,
+        'word': word if audio_path else None
+    } 
+    return render(request, 'input_word.html', context)
