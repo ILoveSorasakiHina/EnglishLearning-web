@@ -10,6 +10,7 @@ from googleapiclient.discovery import build
 from requests_oauthlib import OAuth2Session
 from .models import Word
 from .forms import LoginForm,RegisterForm,WordForm,UpdateForm
+from .ecpay_testing import main
 
 
 # 註冊
@@ -219,9 +220,6 @@ def authorize(request):
     
     # 儲存以作驗證
     request.session['oauth_state'] = state
-    print(f"Generated state: {state}")
-    print(f"Stored state in session: {request.session.get('oauth_state')}")
-
     # 導向授權URL
     return redirect(authorization_url)
 
@@ -296,7 +294,7 @@ def convert_text_to_speech(request, word):
     audio_dir = 'static/audio/'
     audio_path = os.path.join(audio_dir, f'{word}.mp3')
     
-    # 確認文件夾
+    # 確認資料夾
     os.makedirs(audio_dir, exist_ok=True)
     
     with open(audio_path, 'wb') as out:
@@ -319,3 +317,7 @@ def input_word(request):
         'word': word if audio_path else None
     } 
     return render(request, 'input_word.html', context)
+
+@csrf_exempt
+def ecpay_view(request):
+    return HttpResponse(main())

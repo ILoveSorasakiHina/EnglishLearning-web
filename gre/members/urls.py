@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from .views import (
     sign_up, sign_in, home, upload_csv, quiz, submit_answer, 
     result, get_all_word, delete_all_word, quiz2, profile, 
-    update, authorize, callback, input_word
+    update, authorize, callback, input_word,ecpay_view
 )
 
 urlpatterns = [
@@ -21,4 +21,6 @@ urlpatterns = [
     path('oauth2/authorize/', authorize, name='authorize'),
     path('oauth2/callback/', callback, name='callback'),
     path('upload/', upload_csv, name='upload'),
+    path('ecpay/', ecpay_view, name= 'ecpay_view'),
+
 ]
